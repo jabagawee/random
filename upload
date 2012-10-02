@@ -1,0 +1,65 @@
+#! /usr/bin/env python
+
+import hashlib
+import os
+import sys
+
+CLEAN = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._~[]\()"
+
+def clean(filename):
+    filename = list(filename)
+    for i in xrange(len(filename)):
+        if filename[i] not in CLEAN:
+            filename[i] = "_"
+    return "".join(filename)
+
+def scramble(filename):
+    f = open(filename, 'r')
+    hasher = hashlib.sha512()
+    while True:
+        data = f.read(1024)
+        if not data:
+            return "%s.txt" % hasher.hexdigest()[:7]
+        hasher.update(data)
+
+exit_code = 0
+def error(msg):
+    sys.stderr.write("ERROR: %s\n" % msg)
+    global exit_code
+    exit_code = 1 # figure out how to make this global
+    
+def main():
+    USER = "andrew"
+    HOST = "jabagawee.com"
+    called_name = sys.argv[0].split("/")[-1]
+    if called_name == 'pb':
+        DIRECTORY = "/srv/www/jabagawee.com/html/pb"
+        URL_BASE = "http://jabagawee.com/pb"
+        rename = scramble
+    elif called_name == 'geturl':
+        DIRECTORY = "/srv/www/jabagawee.com/html/files"
+        URL_BASE = "http://jabagawee.com/files"
+        rename = clean
+    else:
+        error("`%s` is not `pb` or `geturl`" % called_name)
+        return exit_code
+    REMOTE = "%s@%s" %(USER, HOST)
+
+    fnames = sys.argv[1:]
+    for fname in fnames:
+        if os.path.exists(fname):
+            if os.path.isfile(fname):
+                print "Uploading %s..." % fname
+                if os.system("scp %s %s:%s/%s" \
+                             %(fname, REMOTE, DIRECTORY, rename(fname))) == 0:
+                    print "URL: %s/%s" %(URL_BASE, rename(fname))
+                else:
+                    error("something derped.")
+            else:
+                error("%s is not a file" % fname)
+        else:
+            error("%s does not exist" % fname)
+    return exit_code
+
+if __name__ == "__main__":
+    main()
