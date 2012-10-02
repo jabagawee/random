@@ -46,6 +46,8 @@ def main():
     REMOTE = "%s@%s" %(USER, HOST)
 
     fnames = sys.argv[1:]
+    if not fnames:
+        error("not enough files")
     for fname in fnames:
         if os.path.exists(fname):
             if os.path.isfile(fname):
