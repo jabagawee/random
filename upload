@@ -4,7 +4,7 @@ import hashlib
 import os
 import sys
 
-CLEAN = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._~[]\()"
+CLEAN = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~[]\()"
 
 def clean(filename):
     filename = list(filename)
